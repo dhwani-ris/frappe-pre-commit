@@ -1,0 +1,31 @@
+- id: frappe-coding-standards
+  name: Frappe Coding Standards Check
+  description: Check general coding standards for Frappe Framework projects
+  entry: python scripts/check_coding_standards.py
+  language: script
+  files: \.py$
+  pass_filenames: true
+
+- id: frappe-translation-check
+  name: Frappe Translation Wrappers Check
+  description: Check if user-facing strings are wrapped in translation functions
+  entry: python scripts/check_translations.py
+  language: script
+  files: \.(py|js)$
+  pass_filenames: true
+
+- id: frappe-sql-security
+  name: Frappe SQL Security Check
+  description: Check for SQL injection vulnerabilities and security issues
+  entry: python scripts/check_sql_security.py
+  language: script
+  files: \.py$
+  pass_filenames: true
+
+- id: frappe-doctype-naming
+  name: Frappe DocType Naming Check
+  description: Check DocType and field naming conventions
+  entry: python scripts/check_doctype_naming.py
+  language: script
+  files: \.(py|js|json)$
+  pass_filenames: true

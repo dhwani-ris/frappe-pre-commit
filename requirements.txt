@@ -1,0 +1,14 @@
+# Core dependencies for the hook scripts
+# Keep this minimal - only what's absolutely needed for the scripts to run
+
+# For YAML parsing (if needed)
+pyyaml>=6.0
+
+# For JSON processing (usually built-in, but explicit for older Python)
+# json is built-in, no need to add
+
+# For regex and file processing (built-in)
+# re, os, pathlib are built-in
+
+# Optional: for better error reporting
+click>=8.0
