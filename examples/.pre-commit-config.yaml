@@ -1,7 +1,7 @@
 # Copy this to your project root as .pre-commit-config.yaml
 # IMPORTANT: First install the package: pip install frappe-pre-commit
 
-exclude: 'node_modules|.git|'
+exclude: 'node_modules|.git'
 default_stages: [pre-commit]
 fail_fast: false
 
@@ -75,7 +75,7 @@ repos:
   # Frappe-specific coding standards
   # The frappe-pre-commit package will be installed automatically
   - repo: https://github.com/dhwani-ris/frappe-pre-commit
-    rev: v1.0.0 
+    rev: v1.0.1 
     hooks:
       - id: frappe-translation-check
         exclude: hooks\.py$
