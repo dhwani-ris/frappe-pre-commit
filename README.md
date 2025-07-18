@@ -496,6 +496,15 @@ We welcome contributions!
 4. Make changes and test thoroughly
 5. Submit pull request
 
+### For Developers
+
+If you want to contribute to the package development, testing, or publishing, see [DEVELOPER.md](DEVELOPER.md) for detailed instructions on:
+- Setting up the development environment
+- Testing changes locally
+- Publishing updates to PyPI
+- Version management
+- Troubleshooting
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -513,8 +522,15 @@ Maintained by **Dhwani RIS**
 **Ready to improve your Frappe code quality?** Get started with Frappe-Pre-commit today! 🚀
 
 ```bash
+# Install pre-commit
 pip install pre-commit
+
+# Download the pre-commit configuration
 curl -o .pre-commit-config.yaml https://raw.githubusercontent.com/dhwani-ris/frappe-pre-commit/main/examples/.pre-commit-config.yaml
+
+# Install the pre-commit hooks (frappe-pre-commit package will be installed automatically)
 pre-commit install
+
+# Run all checks
 pre-commit run --all-files
 ```

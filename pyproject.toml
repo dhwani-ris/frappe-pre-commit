@@ -7,7 +7,7 @@ name = "frappe-pre-commit"
 version = "1.0.0"
 description = "Pre-commit hooks for Frappe Framework coding standards"
 readme = "README.md"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
     {name = "Bhushan Barbuddhe", email = "bhushan.barbuddhe@dhwaniris.com"}
 ]
@@ -20,7 +20,6 @@ keywords = ["frappe", "erpnext", "pre-commit", "hooks", "code-quality"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
@@ -36,6 +35,12 @@ Repository = "https://github.com/dhwani-ris/frappe-pre-commit"
 Documentation = "https://github.com/dhwani-ris/frappe-pre-commit#readme"
 "Bug Tracker" = "https://github.com/dhwani-ris/frappe-pre-commit/issues"
 Changelog = "https://github.com/dhwani-ris/frappe-pre-commit/blob/main/CHANGELOG.md"
+
+[project.scripts]
+frappe-pre-commit-coding-standards = "scripts.check_coding_standards:main"
+frappe-pre-commit-translations = "scripts.check_translations:main"
+frappe-pre-commit-sql-security = "scripts.check_sql_security:main"
+frappe-pre-commit-doctype-naming = "scripts.check_doctype_naming:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
