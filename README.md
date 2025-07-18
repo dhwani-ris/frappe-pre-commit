@@ -17,6 +17,29 @@
 
 ## 🚀 Quick Start
 
+### System Requirements
+
+- **Python**: 3.8 or higher
+- **pip**: Latest version
+- **pre-commit**: Will be installed automatically
+- **Git**: For version control
+
+### Python Path Setup
+
+If you encounter "Executable `python` not found" errors, ensure Python is properly configured:
+
+```bash
+# Check Python installation
+python3 --version
+
+# Create python symlink if needed (Linux/macOS)
+sudo ln -s /usr/bin/python3 /usr/bin/python
+
+# Or add alias to your shell profile (~/.bashrc, ~/.zshrc)
+echo 'alias python=python3' >> ~/.bashrc
+source ~/.bashrc
+```
+
 ### For New Frappe Projects
 
 ```bash
@@ -451,6 +474,28 @@ pre-commit install
 pre-commit run --all-files
 ```
 
+**Python executable not found error:**
+```bash
+# Error: Executable `python` not found
+# Solution: Create a python symlink or alias
+
+# Option 1: Create symlink (Linux/macOS)
+sudo ln -s /usr/bin/python3 /usr/bin/python
+
+# Option 2: Create alias (add to ~/.bashrc or ~/.zshrc)
+alias python=python3
+
+# Option 3: Use python3 explicitly in PATH
+export PATH="/usr/bin:$PATH"
+
+# Option 4: Install python-is-python3 package (Ubuntu/Debian)
+sudo apt install python-is-python3
+
+# After fixing, reinstall pre-commit hooks
+pre-commit uninstall
+pre-commit install
+```
+
 **Hooks failing on large files:**
 ```bash
 # Skip hooks for specific commit
@@ -469,6 +514,16 @@ exclude: |
 ```bash
 # Make sure Python can find the scripts
 export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+```
+
+**Package installation issues:**
+```bash
+# If frappe-pre-commit package fails to install automatically
+pip install frappe-pre-commit
+
+# Clear pre-commit cache and reinstall
+pre-commit clean
+pre-commit install
 ```
 
 ### Performance Tips
@@ -534,3 +589,5 @@ pre-commit install
 # Run all checks
 pre-commit run --all-files
 ```
+
+> **Note**: If you encounter "Executable `python` not found" errors, see the [Python Path Setup](#python-path-setup) section above.
