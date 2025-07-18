@@ -1,6 +1,5 @@
 # 🎯 Frappe Pre-commit
 
-[![Test Hooks](https://github.com/dhwani-ris/frappe-pre-commit/workflows/Test%20Hooks/badge.svg)](https://github.com/dhwani-ris/frappe-pre-commit/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)

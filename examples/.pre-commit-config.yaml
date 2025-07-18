@@ -85,7 +85,7 @@ repos:
 
   # Frappe-specific coding standards
   - repo: https://github.com/dhwani-ris/frappe-pre-commit
-    rev: v1.0.0  # Use latest tag
+    rev: v1.0.0
     hooks:
       - id: frappe-translation-check
       - id: frappe-sql-security
