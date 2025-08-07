@@ -9,7 +9,6 @@
 ## ✨ Features
 
 - 🛡️ **SQL Injection Prevention** - Detect and prevent SQL injection vulnerabilities
-- 🌐 **Translation Validation** - Ensure all user-facing strings are properly wrapped for internationalization
 - 📏 **Coding Standards** - Enforce Frappe-specific coding conventions and best practices
 - 📝 **DocType Naming** - Validate DocType and field naming conventions
 - ⚡ **Fast Execution** - Lightweight checks with minimal dependencies
@@ -76,7 +75,6 @@ pre-commit run --all-files
 | Hook ID | Description | Files | Dependencies |
 |---------|-------------|-------|--------------|
 | `frappe-coding-standards` | General coding standards and best practices | `*.py` | None |
-| `frappe-translation-check` | Translation wrapper validation | `*.py`, `*.js` | None |
 | `frappe-sql-security` | SQL injection and security checks | `*.py` | None |
 | `frappe-doctype-naming` | DocType and field naming conventions | `*.py`, `*.js`, `*.json` | `pyyaml` |
 
@@ -204,27 +202,6 @@ frappe.db.sql("SELECT * FROM tabUser WHERE name = %s", user_name)
 frappe.db.set_value("User", user, "password", frappe.utils.password.encrypt(plain_password))
 ```
 
-### 🌐 Translation Checks
-
-**Ensures all user-facing strings are wrapped:**
-
-```python
-# ❌ Will be flagged
-frappe.msgprint("Document saved successfully")
-frappe.throw("Invalid email address")
-
-# ✅ Correct approach
-frappe.msgprint(_("Document saved successfully"))
-frappe.throw(_("Invalid email address"))
-```
-
-```javascript
-// ❌ Will be flagged
-frappe.msgprint("Document saved successfully");
-
-// ✅ Correct approach
-frappe.msgprint(__("Document saved successfully"));
-```
 
 ### 📏 Coding Standards
 
