@@ -19,7 +19,6 @@ pip install build twine
 ```bash
 # Test the console scripts
 frappe-pre-commit-coding-standards --help
-frappe-pre-commit-translations --help
 frappe-pre-commit-sql-security --help
 frappe-pre-commit-doctype-naming --help
 
@@ -185,9 +184,6 @@ Follow [Semantic Versioning](https://semver.org/):
 ```bash
 # Test coding standards
 python scripts/check_coding_standards.py scripts/check_coding_standards.py
-
-# Test translations
-python scripts/check_translations.py scripts/check_translations.py
 
 # Test SQL security
 python scripts/check_sql_security.py scripts/check_sql_security.py
