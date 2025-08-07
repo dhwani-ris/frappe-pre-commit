@@ -7,15 +7,6 @@
   files: \.py$
   pass_filenames: true
 
-- id: frappe-translation-check
-  name: Frappe Translation Wrappers Check
-  description: Check if user-facing strings are wrapped in translation functions
-  entry: frappe-pre-commit-translations
-  language: python
-  additional_dependencies: [frappe-pre-commit]
-  files: \.(py|js)$
-  pass_filenames: true
-
 - id: frappe-sql-security
   name: Frappe SQL Security Check
   description: Check for SQL injection vulnerabilities and security issues

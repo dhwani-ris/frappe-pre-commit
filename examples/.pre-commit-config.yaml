@@ -77,8 +77,6 @@ repos:
   - repo: https://github.com/dhwani-ris/frappe-pre-commit
     rev: v1.0.1 
     hooks:
-      - id: frappe-translation-check
-        exclude: hooks\.py$
       - id: frappe-sql-security
       - id: frappe-doctype-naming
       - id: frappe-coding-standards

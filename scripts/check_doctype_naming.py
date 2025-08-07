@@ -145,10 +145,54 @@ def _is_valid_field_label(label):
 	if not label:
 		return False
 	
-	# Should be Title Case
-	# Examples: "Customer Name", "Item Code", "Posting Date"
+	# Should be Title Case, but allow for:
+	# - Numbers (e.g., "Address 1", "Address 2")
+	# - Special characters like "&", "%", "(", ")", "-" (e.g., "A & B", "Discount %", "Price (USD)")
+	# - Common prepositions like "of", "in", "at", "to", "for", "with", "by" (e.g., "Area of Address")
+	# - Abbreviations and acronyms
+	
 	words = label.split()
-	return all(word[0].isupper() if word else False for word in words)
+	if not words:
+		return False
+	
+	# Common prepositions that can be lowercase
+	prepositions = {'of', 'in', 'at', 'to', 'for', 'with', 'by', 'from', 'on', 'up', 'down', 'out', 'off', 'over', 'under'}
+	
+	for i, word in enumerate(words):
+		if not word:
+			continue
+		
+		# Skip validation for numbers
+		if word.isdigit():
+			continue
+		
+		# Skip validation for standalone special characters like "&", "%", "-", etc.
+		if word in ['&', '-', '/', '\\', '%', '+', '=']:
+			continue
+		
+		# Handle words with parentheses like "(USD)", "(Active)", etc.
+		if word.startswith('(') and word.endswith(')'):
+			# Check if the content inside parentheses is valid (all caps or mixed case)
+			content = word[1:-1]  # Remove parentheses
+			if content.isupper() or content.isalpha():
+				continue
+		
+		# Check for invalid patterns
+		if '_' in word:  # No underscores allowed
+			return False
+		
+		if word.isupper() and len(word) > 1:  # No all caps words (except single letters)
+			return False
+		
+		# Allow lowercase for prepositions (except at the beginning)
+		if i > 0 and word.lower() in prepositions:
+			continue
+		
+		# For all other words, first character should be uppercase
+		if not word[0].isupper():
+			return False
+	
+	return True
 
 
 def main():
