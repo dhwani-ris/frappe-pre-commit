@@ -207,8 +207,8 @@ frappe.db.set_value("User", user, "password", frappe.utils.password.encrypt(plai
 
 **Enforces:**
 - Function length (≤20 lines recommended)
-- Proper indentation (tabs, not spaces)
 - Naming conventions (snake_case for functions, PascalCase for classes)
+- Ignore setUp and tearDown naming checks in test files, since they follow testing conventions 
 - Import organization
 - Complexity limits (max nesting depth)
 
