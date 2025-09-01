@@ -193,7 +193,6 @@ def main():
 		for error in all_errors:
 			print(f"  {error}")
 		print("\n💡 Coding standards:")
-		print("   ✅ Use tabs for indentation")
 		print("   ✅ Keep functions under 20 lines")
 		print("   ✅ Use snake_case for functions and variables")
 		print("   ✅ Use PascalCase for classes")
