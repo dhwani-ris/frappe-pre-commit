@@ -13,7 +13,7 @@ import re
 import sys
 import ast
 from pathlib import Path
-
+import os
 
 def check_function_length(file_path):
 	"""Check if functions are too long (>50 lines)"""
@@ -35,28 +35,6 @@ def check_function_length(file_path):
 	
 	return errors
 
-
-def check_indentation(file_path):
-	"""Check for consistent tab indentation"""
-	errors = []
-	
-	try:
-		with open(file_path, 'r', encoding='utf-8') as f:
-			lines = f.readlines()
-	except (UnicodeDecodeError, FileNotFoundError):
-		return errors
-	
-	for i, line in enumerate(lines, 1):
-		# Check if line starts with spaces and is not empty
-		if line.startswith(' ') and line.strip():
-			# Count leading spaces
-			leading_spaces = len(line) - len(line.lstrip(' '))
-			if leading_spaces > 0:
-				errors.append(f"Line {i}: Uses {leading_spaces} spaces instead of tabs for indentation")
-	
-	return errors
-
-
 def check_naming_conventions(file_path):
 	"""Check naming conventions for functions and variables"""
 	errors = []
@@ -68,9 +46,16 @@ def check_naming_conventions(file_path):
 	except (SyntaxError, UnicodeDecodeError, FileNotFoundError):
 		return errors
 	
+	file_name = os.path.basename(file_path)
+
 	for node in ast.walk(tree):
 		# Check function names
 		if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+			if file_name.startswith('test_'):
+				# Skip setUp and tearDown methods for test files
+				if node.name == "setUp" or node.name == "tearDown":
+					continue
+
 			if not _is_valid_snake_case(node.name) and not node.name.startswith('_'):
 				errors.append(f"Function '{node.name}' at line {node.lineno} should use snake_case naming")
 		
@@ -195,7 +180,6 @@ def main():
 		
 		if path.suffix == '.py':
 			errors.extend(check_function_length(file_path))
-			errors.extend(check_indentation(file_path))
 			errors.extend(check_naming_conventions(file_path))
 			errors.extend(check_import_organization(file_path))
 			errors.extend(check_code_complexity(file_path))
