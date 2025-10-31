@@ -16,7 +16,7 @@ from pathlib import Path
 
 
 def check_function_length(file_path):
-	"""Check if functions are too long (>20 lines)"""
+	"""Check if functions are too long (>50 lines)"""
 	errors = []
 	
 	try:
@@ -30,7 +30,7 @@ def check_function_length(file_path):
 		if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
 			if hasattr(node, 'end_lineno') and node.end_lineno:
 				func_length = node.end_lineno - node.lineno + 1
-				if func_length > 20:
+				if func_length > 50:
 					errors.append(f"Function '{node.name}' at line {node.lineno} is too long ({func_length} lines). Consider breaking it into smaller functions.")
 	
 	return errors
@@ -133,8 +133,8 @@ def check_code_complexity(file_path):
 			if indentation_level > 4 and any(keyword in line for keyword in ['if ', 'for ', 'while ', 'try:']):
 				errors.append(f"Line {i}: Code is too deeply nested (level {indentation_level}). Consider refactoring.")
 		
-		# Check for very long lines (>120 characters)
-		if len(line) > 120:
+		# Check for very long lines (>200 characters)
+		if len(line) > 200:
 			errors.append(f"Line {i}: Line too long ({len(line)} characters). Consider breaking into multiple lines.")
 	
 	return errors
@@ -209,13 +209,12 @@ def main():
 		for error in all_errors:
 			print(f"  {error}")
 		print("\n💡 Coding standards:")
-		print("   ✅ Use tabs for indentation")
-		print("   ✅ Keep functions under 20 lines")
+		print("   ✅ Keep functions under 50 lines")
 		print("   ✅ Use snake_case for functions and variables")
 		print("   ✅ Use PascalCase for classes")
 		print("   ✅ Place imports at the top of files")
 		print("   ✅ Avoid deep nesting (max 4 levels)")
-		print("   ✅ Keep lines under 120 characters")
+		print("   ✅ Keep lines under 200 characters")
 		return 1
 	
 	return 0

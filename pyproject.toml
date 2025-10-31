@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "frappe-pre-commit"
-version = "1.0.1"
+version = "1.0.4"
 description = "Pre-commit hooks for Frappe Framework coding standards"
 readme = "README.md"
 license = "MIT"
