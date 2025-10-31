@@ -14,6 +14,7 @@ import sys
 import ast
 from pathlib import Path
 import os
+import os
 
 def check_function_length(file_path):
 	"""Check if functions are too long (>50 lines)"""
@@ -48,9 +49,17 @@ def check_naming_conventions(file_path):
 	
 	file_name = os.path.basename(file_path)
 
+	
+	file_name = os.path.basename(file_path)
+
 	for node in ast.walk(tree):
 		# Check function names
 		if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+			if file_name.startswith('test_'):
+				# Skip setUp and tearDown methods for test files
+				if node.name == "setUp" or node.name == "tearDown":
+					continue
+
 			if file_name.startswith('test_'):
 				# Skip setUp and tearDown methods for test files
 				if node.name == "setUp" or node.name == "tearDown":
