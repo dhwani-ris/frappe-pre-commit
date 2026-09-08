@@ -98,7 +98,7 @@ def check_import_organization(file_path):
 		
 		# Check if it's an import
 		if stripped.startswith(('import ', 'from ')):
-			if non_import_found:
+			if non_import_found and not _is_suppressed(line):
 				errors.append(f"Line {i}: Import should be at the top of the file")
 		else:
 			# First non-import line found
@@ -166,9 +166,38 @@ def _is_valid_snake_case(name):
 	return re.match(r'^[a-z_][a-z0-9_]*$', name) is not None
 
 
+def _is_suppressed(line):
+	"""True when a line is marked as a deliberate exception.
+
+	An import inside a function body is a normal Python idiom, not a mistake:
+	it is how an import cycle is broken, and how an expensive module is
+	deferred. This checker cannot tell such a case from a careless one, so it
+	lets the author say so.
+
+	Recognised: `# frappe-noqa` anywhere in the line, with any trailing
+	reason.
+
+	DELIBERATELY NOT SPELLED `# noqa`. That namespace belongs to flake8 and
+	ruff, and ruff polices it: RUF100 reports an "unused blanket noqa
+	directive" for any `# noqa` it does not itself need. Since ruff runs
+	alongside this hook in the same pre-commit config on a Frappe project, a
+	`# noqa` added for us is flagged by ruff -- the two tools would cancel
+	each other out and the author would be stuck. Measured, not assumed: this
+	is exactly what happened on the app this fix came from.
+	"""
+	return re.search(r'#\s*frappe-noqa\b', line) is not None
+
+
 def _is_valid_pascal_case(name):
-	"""Check if name follows PascalCase convention"""
-	return re.match(r'^[A-Z][a-zA-Z0-9]*$', name) is not None
+	"""Check if name follows PascalCase convention.
+
+	One leading underscore is allowed. PEP 8 uses it to mark something as
+	internal to a module, and it is the conventional spelling for a private
+	helper class or a test fixture. `_is_valid_snake_case` above already
+	accepts it for functions, so rejecting it for classes was inconsistent
+	within this very file.
+	"""
+	return re.match(r'^_?[A-Z][a-zA-Z0-9]*$', name) is not None
 
 
 def main():
