@@ -86,26 +86,31 @@ def check_import_organization(file_path):
 	except (UnicodeDecodeError, FileNotFoundError):
 		return errors
 	
-	imports_section = True
+	# Only module-level imports are subject to the "imports at the top" rule.
+	# An import nested inside a function or a class body is a deliberate
+	# technique - it breaks an import cycle, or defers loading a heavy or
+	# optional dependency until it is actually needed. Frappe code relies on
+	# this constantly. Flagging it produced false positives on every file that
+	# used the pattern, so walk the AST and look only at module scope.
+	try:
+		tree = ast.parse(''.join(lines))
+	except SyntaxError:
+		return errors
+
 	non_import_found = False
-	
-	for i, line in enumerate(lines, 1):
-		stripped = line.strip()
-		
-		# Skip empty lines and comments
-		if not stripped or stripped.startswith('#'):
-			continue
-		
-		# Check if it's an import
-		if stripped.startswith(('import ', 'from ')):
+
+	for node in tree.body:
+		if isinstance(node, (ast.Import, ast.ImportFrom)):
 			if non_import_found:
-				errors.append(f"Line {i}: Import should be at the top of the file")
-		else:
-			# First non-import line found
-			if imports_section:
-				imports_section = False
-				non_import_found = True
-	
+				errors.append(f"Line {node.lineno}: Import should be at the top of the file")
+			continue
+
+		# A module docstring, and __future__ handling, precede imports legally.
+		if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) 				and isinstance(node.value.value, str):
+			continue
+
+		non_import_found = True
+
 	return errors
 
 
@@ -167,8 +172,13 @@ def _is_valid_snake_case(name):
 
 
 def _is_valid_pascal_case(name):
-	"""Check if name follows PascalCase convention"""
-	return re.match(r'^[A-Z][a-zA-Z0-9]*$', name) is not None
+	"""Check if name follows PascalCase convention.
+
+	A leading underscore marks the name as module-private and is allowed, the
+	same exemption check_naming_conventions already gives private functions.
+	'_Resp' is a private class in PascalCase, not a naming violation.
+	"""
+	return re.match(r'^_?[A-Z][a-zA-Z0-9]*$', name) is not None
 
 
 def main():
