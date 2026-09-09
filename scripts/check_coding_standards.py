@@ -14,7 +14,23 @@ import sys
 import ast
 from pathlib import Path
 import os
-import os
+
+# unittest calls these by fixed name (TestCase, TestSuite, and module-level
+# hooks) - a test file cannot rename them to snake_case and still have the
+# runner invoke them.
+_UNITTEST_LIFECYCLE_METHODS = {
+	"setUp",
+	"tearDown",
+	"setUpClass",
+	"tearDownClass",
+	"setUpModule",
+	"tearDownModule",
+}
+
+# ast.NodeVisitor / ast.NodeTransformer subclasses dispatch on this fixed
+# pattern; the suffix is a stdlib AST node class name (PascalCase) and isn't
+# under the subclass author's control.
+_VISIT_DISPATCH_METHOD = re.compile(r'^visit_[A-Z][a-zA-Z0-9]*$')
 
 def check_function_length(file_path):
 	"""Check if functions are too long (>50 lines)"""
@@ -49,21 +65,22 @@ def check_naming_conventions(file_path):
 	
 	file_name = os.path.basename(file_path)
 
-	
-	file_name = os.path.basename(file_path)
-
 	for node in ast.walk(tree):
 		# Check function names
 		if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-			if file_name.startswith('test_'):
-				# Skip setUp and tearDown methods for test files
-				if node.name == "setUp" or node.name == "tearDown":
-					continue
+			# unittest fixes these names in its public API (TestCase /
+			# TestSuite lifecycle hooks); a test file can't rename them to
+			# snake_case and still have the test runner call them.
+			if file_name.startswith('test_') and node.name in _UNITTEST_LIFECYCLE_METHODS:
+				continue
 
-			if file_name.startswith('test_'):
-				# Skip setUp and tearDown methods for test files
-				if node.name == "setUp" or node.name == "tearDown":
-					continue
+			# ast.NodeVisitor / ast.NodeTransformer dispatch to visit_<NodeType>
+			# by convention (generic_visit does getattr(self, 'visit_' +
+			# node.__class__.__name__)); the NodeType half is a stdlib class
+			# name and is necessarily PascalCase, not something the subclass
+			# author can rename.
+			if _VISIT_DISPATCH_METHOD.match(node.name):
+				continue
 
 			if not _is_valid_snake_case(node.name) and not node.name.startswith('_'):
 				errors.append(f"Function '{node.name}' at line {node.lineno} should use snake_case naming")
