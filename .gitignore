@@ -281,10 +281,15 @@ $RECYCLE.BIN/
 .pre-commit-config.yaml.local
 
 # Test files and directories
+# (scratch fixtures used for manually exercising the hooks against sample
+# bad code - not this package's own /tests/ suite, re-included below)
 test_*.py
 tests/
 test_project/
 *.test.py
+!/tests/
+!/tests/**
+/tests/**/__pycache__/
 
 # Temporary files
 *.tmp
