@@ -14,7 +14,19 @@ import sys
 import ast
 from pathlib import Path
 import os
-import os
+
+# Method names the unittest framework invokes by exact, fixed name. They must
+# stay camelCase - renaming any of them to snake_case makes unittest silently
+# skip the fixture (no error, the setup/teardown just never runs).
+UNITTEST_LIFECYCLE_METHODS = {
+	"setUp",
+	"tearDown",
+	"setUpClass",
+	"tearDownClass",
+	"setUpModule",
+	"tearDownModule",
+}
+
 
 def check_function_length(file_path):
 	"""Check if functions are too long (>50 lines)"""
@@ -49,21 +61,11 @@ def check_naming_conventions(file_path):
 	
 	file_name = os.path.basename(file_path)
 
-	
-	file_name = os.path.basename(file_path)
-
 	for node in ast.walk(tree):
 		# Check function names
 		if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-			if file_name.startswith('test_'):
-				# Skip setUp and tearDown methods for test files
-				if node.name == "setUp" or node.name == "tearDown":
-					continue
-
-			if file_name.startswith('test_'):
-				# Skip setUp and tearDown methods for test files
-				if node.name == "setUp" or node.name == "tearDown":
-					continue
+			if file_name.startswith('test_') and node.name in UNITTEST_LIFECYCLE_METHODS:
+				continue
 
 			if not _is_valid_snake_case(node.name) and not node.name.startswith('_'):
 				errors.append(f"Function '{node.name}' at line {node.lineno} should use snake_case naming")

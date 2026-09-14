@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "frappe-pre-commit"
-version = "1.0.4"
+version = "1.0.6"
 description = "Pre-commit hooks for Frappe Framework coding standards"
 readme = "README.md"
 license = "MIT"
@@ -27,6 +27,11 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Topic :: Software Development :: Quality Assurance",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
 ]
 
 [project.urls]
