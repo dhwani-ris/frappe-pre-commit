@@ -13,6 +13,7 @@
 - 📝 **DocType Naming** - Validate DocType and field naming conventions
 - ⚡ **Fast Execution** - Lightweight checks with minimal dependencies
 - 🎯 **Customizable** - Pick and choose hooks based on your project needs
+- 🧱 **Baseline for existing codebases** - Accept today's violations, enforce the rules on every new change
 
 ## 🚀 Quick Start
 
@@ -66,9 +67,16 @@ cd apps/your_app
 pip install pre-commit
 pre-commit install
 
-# 4. Run on existing code
+# 4. Accept the violations that already exist, and commit the baseline
+pip install "git+https://github.com/dhwani-ris/frappe-pre-commit@v1.0.6"
+frappe-pre-commit-baseline create
+git add .frappe-pre-commit-baseline.json
+
+# 5. From now on only NEW violations fail
 pre-commit run --all-files
 ```
+
+See [Adopting on an existing codebase](#-adopting-on-an-existing-codebase-baseline) for how the baseline works.
 
 ## 📋 Available Hooks
 
@@ -77,6 +85,9 @@ pre-commit run --all-files
 | `frappe-coding-standards` | General coding standards and best practices | `*.py` | None |
 | `frappe-sql-security` | SQL injection and security checks | `*.py` | None |
 | `frappe-doctype-naming` | DocType and field naming conventions | `*.py`, `*.js`, `*.json` | `pyyaml` |
+
+All three hooks honour a [baseline](#-adopting-on-an-existing-codebase-baseline) of accepted
+pre-existing violations. The `frappe-pre-commit-baseline` command creates and maintains it.
 
 ## ⚙️ Configuration
 
@@ -88,10 +99,10 @@ Create `.pre-commit-config.yaml` in your project root:
 repos:
   # Frappe-specific hooks
   - repo: https://github.com/dhwani-ris/frappe-pre-commit
-    rev: v1.0.0  # Use latest tag
+    rev: v1.0.6  # Use latest tag
     hooks:
-      - id: frappe-translation-check
       - id: frappe-sql-security
+      - id: frappe-doctype-naming
       - id: frappe-coding-standards
 
   # Code formatting (recommended)
@@ -156,7 +167,7 @@ repos:
 
   # Frappe-specific coding standards
   - repo: https://github.com/dhwani-ris/frappe-pre-commit
-    rev: v1.0.0
+    rev: v1.0.6
     hooks:
       - id: frappe-coding-standards 
 
@@ -177,11 +188,85 @@ exclude: |
 # Use only specific hooks you need
 repos:
   - repo: https://github.com/dhwani-ris/frappe-pre-commit
-    rev: v1.0.0
+    rev: v1.0.6
     hooks:
       - id: frappe-sql-security     # Only SQL security checks
-      - id: frappe-translation-check # Only translation checks
+      - id: frappe-doctype-naming   # Only DocType naming checks
 ```
+
+## 🧱 Adopting on an Existing Codebase (Baseline)
+
+Turning these hooks on for a large, established app usually reports hundreds of violations at once.
+Fixing them all first means refactoring code that is running in production. A **baseline** avoids
+that: it records the violations that exist today, and from then on the hooks fail only on violations
+that are new.
+
+### Create it once
+
+```bash
+# Install the same version as the hook `rev` in .pre-commit-config.yaml
+pip install "git+https://github.com/dhwani-ris/frappe-pre-commit@v1.0.6"
+cd apps/your_app
+frappe-pre-commit-baseline create       # scans every file git tracks
+git add .frappe-pre-commit-baseline.json
+git commit -m "chore: add frappe-pre-commit baseline"
+```
+
+The hooks pick up `.frappe-pre-commit-baseline.json` from the repository root automatically. No change
+to `.pre-commit-config.yaml` is needed. To keep it somewhere else, pass the path to each hook:
+
+```yaml
+      - id: frappe-coding-standards
+        args: [--baseline=config/frappe-baseline.json]
+```
+
+### What counts as new
+
+Each violation is identified by its file, its rule and a key that does **not** include a line number:
+
+| Rule | Key |
+|------|-----|
+| Function length, naming | Qualified name, e.g. `Procurement.validate` |
+| Import position | The import statement |
+| Field label / name | The fieldname and label |
+| Line-based rules (SQL patterns, nesting, line length) | The text of the offending line |
+
+So:
+
+- Adding or removing lines elsewhere in a file does **not** affect the baseline.
+- A new long function, a new unsafe SQL line, or a new badly named field fails.
+- Editing a baselined line (for example rewriting a flagged SQL query) makes it a new violation, so
+  code you touch is held to the standard.
+- **Long functions are ratcheted.** A baselined function passes only while it is no longer than its
+  recorded length. Making it longer fails with `baseline allows N; it grew by M`.
+- If a file has the same violation several times, the baseline records the count. One more occurrence
+  fails.
+- Renaming or moving a file makes its violations new. Re-run `create` for that file (see below).
+
+When a hook fails, it lists the new violations and says how many pre-existing ones were accepted.
+
+### Keep it shrinking
+
+```bash
+frappe-pre-commit-baseline prune      # remove entries that have been fixed; never adds any
+frappe-pre-commit-baseline summary    # accepted violations per check and rule
+```
+
+`prune` also lowers the recorded length of a long function that has been shortened, so it cannot grow
+back. Run it after refactoring and commit the smaller baseline.
+
+### Partial updates
+
+```bash
+frappe-pre-commit-baseline create path/to/moved_file.py         # re-baseline one file
+frappe-pre-commit-baseline --check sql-security create          # re-baseline one check
+```
+
+A partial `create` or `prune` only rewrites the files and checks it scanned and leaves every other
+entry alone. Use `--no-baseline` on a hook to see every violation, including accepted ones.
+
+> Treat a full `create` like any other change to the rules: it accepts everything that exists at that
+> moment. Prefer `prune` for day-to-day maintenance.
 
 ## 🔍 What Gets Checked
 
@@ -206,18 +291,22 @@ frappe.db.set_value("User", user, "password", frappe.utils.password.encrypt(plai
 ### 📏 Coding Standards
 
 **Enforces:**
-- Function length (≤20 lines recommended)
-- Naming conventions (snake_case for functions, PascalCase for classes)
-- Ignore setUp and tearDown naming checks in test files, since they follow testing conventions 
-- Import organization
-- Complexity limits (max nesting depth)
+- Function length (≤50 lines, counted from `def` to the last line of the body)
+- Naming conventions (snake_case for functions, PascalCase for classes; a leading `_` is allowed)
+- unittest's own names (`setUp`, `tearDown`, `setUpClass`, `tearDownClass`, `setUpModule`, `tearDownModule`, `asyncSetUp`, `asyncTearDown`) are exempt from the naming check
+- Import organization (module-level imports only; imports inside functions are allowed)
+- Complexity limits (max nesting depth 4, measured on the code structure, so indentation inside strings and tabs versus spaces do not matter)
+- Line length (≤200 characters)
 
 ### 📝 DocType Naming Conventions
 
 **Validates:**
 - DocType names: Title Case with spaces (`"Sales Order"`)
-- Field names: snake_case (`"customer_name"`)
-- Field labels: Title Case (`"Customer Name"`)
+- Field names: snake_case (`"customer_name"`; a leading `_` is allowed, as in Frappe's `_user_tags`)
+- Field labels: Title Case (`"Customer Name"`), allowing acronyms (`"Season ID"`, `"CFPP Push Status"`),
+  lowercase minor words after the first word (`"Calls per Minute"`, `"Resolved to a Farmer"`) and any
+  casing inside parentheses (`"Details (read-only)"`)
+- `frappe.ui.form.on("*", ...)`, the all-DocTypes handler, is not treated as a DocType name
 
 ## 🏗️ Integration Examples
 
@@ -257,6 +346,23 @@ jobs:
       - name: Run pre-commit
         run: pre-commit run --all-files
 ```
+
+For pull requests on an existing codebase, check only the files the PR changes:
+
+```yaml
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # ...
+      - name: Run pre-commit on changed files
+        run: |
+          pre-commit run \
+            --from-ref ${{ github.event.pull_request.base.sha }} \
+            --to-ref ${{ github.event.pull_request.head.sha }} \
+            --show-diff-on-failure
+```
+
+Combined with a baseline, legacy code in a touched file is still accepted and only new violations fail.
 
 ### Integration with VS Code
 
@@ -304,10 +410,10 @@ pre-commit install
 # Test individual scripts
 python scripts/check_coding_standards.py test_files/sample.py
 python scripts/check_sql_security.py test_files/sample.py
-python scripts/check_translations.py test_files/sample.py
+python scripts/check_doctype_naming.py test_files/sample.py
 
-# Test all hooks
-python test_scripts/test_all_hooks.py
+# Run the unit tests
+python -m unittest discover -s tests -t .
 
 # Test with pre-commit
 pre-commit run --all-files
@@ -331,7 +437,7 @@ EOF
 
 # Test your hooks
 cd ../
-python scripts/check_translations.py test_project/bad_example.py
+python scripts/check_coding_standards.py test_project/bad_example.py
 python scripts/check_sql_security.py test_project/bad_example.py
 ```
 
@@ -374,7 +480,7 @@ cd apps/inventory_management
 cat > .pre-commit-config.yaml << 'EOF'
 repos:
   - repo: https://github.com/dhwani-ris/frappe-pre-commit
-    rev: v1.0.0
+    rev: v1.0.6
     hooks:
       - id: frappe-quick-check
 EOF

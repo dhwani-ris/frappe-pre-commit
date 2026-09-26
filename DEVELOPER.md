@@ -26,6 +26,22 @@ frappe-pre-commit-doctype-naming --help
 frappe-pre-commit-coding-standards scripts/check_coding_standards.py
 ```
 
+### 3. Run the Unit Tests
+
+```bash
+python -m unittest discover -s tests -t .
+```
+
+The suite covers the checkers and the baseline (fingerprints, ratchet, `create` / `prune` scoping).
+To try a change end to end against a real app without publishing it:
+
+```bash
+cd /path/to/your_app
+pre-commit try-repo /path/to/frappe-pre-commit frappe-coding-standards --all-files
+```
+
+`try-repo` installs only files that git tracks, so `git add` any new module first.
+
 ## Publishing to PyPI
 
 ### First Time Setup

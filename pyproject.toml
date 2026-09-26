@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "frappe-pre-commit"
-version = "1.0.4"
+version = "1.0.6"
 description = "Pre-commit hooks for Frappe Framework coding standards"
 readme = "README.md"
 license = "MIT"
@@ -38,9 +38,9 @@ Changelog = "https://github.com/dhwani-ris/frappe-pre-commit/blob/main/CHANGELOG
 
 [project.scripts]
 frappe-pre-commit-coding-standards = "scripts.check_coding_standards:main"
-frappe-pre-commit-translations = "scripts.check_translations:main"
 frappe-pre-commit-sql-security = "scripts.check_sql_security:main"
 frappe-pre-commit-doctype-naming = "scripts.check_doctype_naming:main"
+frappe-pre-commit-baseline = "scripts.baseline:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
