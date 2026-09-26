@@ -285,6 +285,9 @@ test_*.py
 tests/
 test_project/
 *.test.py
+# ...but keep the package's own unit tests
+!tests/
+!tests/*.py
 
 # Temporary files
 *.tmp

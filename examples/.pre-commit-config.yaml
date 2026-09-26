@@ -75,7 +75,7 @@ repos:
   # Frappe-specific coding standards
   # The frappe-pre-commit package will be installed automatically
   - repo: https://github.com/dhwani-ris/frappe-pre-commit
-    rev: v1.0.4 
+    rev: v1.0.6
     hooks:
       - id: frappe-sql-security
       - id: frappe-doctype-naming
